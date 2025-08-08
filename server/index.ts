@@ -10,11 +10,11 @@ app.use(cors());
 app.use(express.json({ limit: '1mb' }));
 
 const PORT = process.env.PORT || 8787;
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const NEXT_PUBLIC_GEMINI_API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 
-if (!GEMINI_API_KEY) {
+if (!NEXT_PUBLIC_GEMINI_API_KEY) {
   console.warn(
-    'GEMINI_API_KEY is not set. Set it in a .env file at project root.'
+    'NEXT_PUBLIC_GEMINI_API_KEY is not set. Set it in a .env file at project root.'
   );
 }
 
@@ -54,7 +54,7 @@ app.post('/api/agent', async (req, res) => {
       ...messages.map((m) => ({ role: m.role, parts: [{ text: m.content }] })),
     ];
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${NEXT_PUBLIC_GEMINI_API_KEY}`;
 
     const response = await axios.post(url, {
       contents: combined,

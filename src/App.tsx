@@ -1,5 +1,6 @@
 import { NavLink, Route, Routes, useLocation } from 'react-router-dom';
 import { ClipboardList, Brain, BarChart3, User, Network } from 'lucide-react';
+import Backdrop from './components/Backdrop';
 import Landing from './pages/Landing';
 import Work from './pages/Work';
 import Whiteboard from './pages/Whiteboard';
@@ -9,16 +10,19 @@ import Account from './pages/Account';
 
 function NavBar() {
   const location = useLocation();
-  const linkBase = 'flex items-center gap-2 px-3 py-2 rounded-md text-sm';
+  const linkBase =
+    'flex items-center gap-2 px-3 py-2 rounded-xl text-sm transition';
   const active = 'bg-white/15';
   const inactive = 'hover:bg-white/10';
 
   return (
-    <nav className='hidden sm:block sticky top-0 z-50 border-b border-white/10 bg-[#1E2A38]/95 backdrop-blur supports-[backdrop-filter]:bg-[#1E2A38]/60'>
+    <nav className='hidden sm:block sticky top-0 z-50 border-b border-white/10 bg-[#0b1220]/70 backdrop-blur-xl'>
       <div className='mx-auto max-w-7xl px-4'>
-        <div className='flex h-14 items-center gap-2'>
+        <div className='flex h-16 items-center gap-2'>
           <NavLink to='/'>
-            <div className='font-semibold tracking-wide'>HussainTaskAI</div>
+            <div className='font-extrabold tracking-tight text-white'>
+              HussainTaskAI
+            </div>
           </NavLink>
           <div className='ml-4 flex items-center gap-1 overflow-x-auto'>
             <NavLink
@@ -77,7 +81,7 @@ function MobileNavBar() {
 
   return (
     <nav
-      className='sm:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-[#1E2A38]/95 backdrop-blur supports-[backdrop-filter]:bg-[#1E2A38]/60'
+      className='sm:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-[#0b1220]/70 backdrop-blur-xl'
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
       <div className='mx-auto max-w-7xl'>
@@ -131,6 +135,7 @@ function MobileNavBar() {
 export default function App() {
   return (
     <div className='min-h-screen pb-24 sm:pb-0'>
+      <Backdrop />
       <NavBar />
       <main className='mx-auto max-w-7xl px-4 py-6'>
         <Routes>
