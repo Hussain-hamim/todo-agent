@@ -263,7 +263,7 @@ export default function Agent() {
             className={m.role === 'user' ? 'text-right' : 'text-left'}
           >
             <div
-              className={`inline-block max-w-[80%] rounded-lg px-3 py-2 text-sm ${
+              className={`inline-block max-w-[80%] rounded-lg px-3 py-2 text-sm whitespace-pre-wrap ${
                 m.role === 'user' ? 'bg-white/20' : 'bg-black/20'
               }`}
             >
