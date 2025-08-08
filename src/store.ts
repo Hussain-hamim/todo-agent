@@ -18,6 +18,9 @@ export type AppState = {
   toggleTask: (id: string) => void;
   deleteTask: (id: string) => void;
   setNotes: (notes: string) => void;
+  setDueDateByTitle: (title: string, dueDate: string) => boolean;
+  renameTaskByTitle: (title: string, newTitle: string) => boolean;
+  clearCompleted: () => number;
 };
 
 const STORAGE_KEY = 'karrytask_state_v1';
@@ -87,5 +90,39 @@ export const useAppStore = create<AppState>((set, get) => ({
   setNotes: (notes: string) => {
     set({ notes });
     save({ ...get(), notes });
+  },
+  setDueDateByTitle: (title: string, dueDate: string) => {
+    const lower = title.toLowerCase();
+    const tasks = get().tasks.map((t) =>
+      t.title.toLowerCase().includes(lower) ? { ...t, dueDate } : t
+    );
+    const changed = tasks.some((t, idx) => t !== get().tasks[idx]);
+    if (changed) {
+      set({ tasks });
+      save({ ...get(), tasks });
+    }
+    return changed;
+  },
+  renameTaskByTitle: (title: string, newTitle: string) => {
+    const lower = title.toLowerCase();
+    const tasks = get().tasks.map((t) =>
+      t.title.toLowerCase().includes(lower) ? { ...t, title: newTitle } : t
+    );
+    const changed = tasks.some((t, idx) => t !== get().tasks[idx]);
+    if (changed) {
+      set({ tasks });
+      save({ ...get(), tasks });
+    }
+    return changed;
+  },
+  clearCompleted: () => {
+    const before = get().tasks.length;
+    const tasks = get().tasks.filter((t) => !t.completed);
+    const removed = before - tasks.length;
+    if (removed > 0) {
+      set({ tasks });
+      save({ ...get(), tasks });
+    }
+    return removed;
   },
 }));
