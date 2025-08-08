@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import axios from 'axios';
+import { postAgent } from '../lib/api';
 import { useAppStore } from '../store';
 import { Send } from 'lucide-react';
 
@@ -116,7 +116,6 @@ export default function Agent() {
           ]);
           return true;
         }
-        // Simple local summary fallback (can be replaced with model summarization later)
         const lines = content.split(/\n+/).filter(Boolean);
         const top = lines.slice(0, 5).join('\n');
         setMessages((m) => [
@@ -204,7 +203,7 @@ export default function Agent() {
     setMessages(next);
 
     try {
-      const { data } = await axios.post('/api/agent', { messages: next });
+      const { data } = await postAgent({ messages: next });
       const text: string = data?.text ?? '';
       const toolCall: { name: string; args: Record<string, unknown> } | null =
         data?.toolCall || null;
@@ -241,7 +240,6 @@ export default function Agent() {
         }
       }
 
-      // Ultra-short fallback: treat short inputs as tasks
       if (!executed) {
         const words = question.split(/\s+/).filter(Boolean);
         if (words.length > 0 && words.length <= 6) {
