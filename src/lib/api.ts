@@ -1,10 +1,14 @@
 import axios from 'axios';
 
-const API_BASE = import.meta.env.VITE_API_BASE?.toString().trim() || '';
+const explicitBase = import.meta.env.VITE_API_BASE?.toString().trim();
+const defaultProdBase = 'https://todo-agent-ltin.onrender.com';
+const resolvedBase =
+  explicitBase ||
+  (import.meta.env.MODE === 'production' ? defaultProdBase : '');
 
 export function agentEndpoint(path: string) {
-  if (API_BASE)
-    return `${API_BASE.replace(/\/$/, '')}${
+  if (resolvedBase)
+    return `${resolvedBase.replace(/\/$/, '')}${
       path.startsWith('/') ? path : `/${path}`
     }`;
   return path;
