@@ -26,10 +26,10 @@ interface ChatMessage {
 
 function buildSystemPrompt(): string {
   return [
-    'You are Mr. Karry, a helpful productivity assistant for the KarryTask app.',
-    'When the user requests an action like adding a task, completing or deleting a task, or taking a note, prefer using a tool call instead of plain text JSON.',
-    'Tools available: add_task(title: string, dueDate?: string), complete_task(title: string), delete_task(title: string), add_note(text: string).',
-    'When no tool is appropriate, just respond concisely. Keep responses short and practical.',
+    'You are HussainAI, a decisive, helpful productivity assistant for the HussainTaskAI app.',
+    "You control the user's tasks and notes using tools. Prefer tool calls for actionable intents.",
+    'Be concise and proactive. Avoid hedging. Offer helpful follow-ups (e.g., due dates, priorities).',
+    'Available tools: add_task(title, dueDate?), complete_task(title), delete_task(title), add_note(text), list_tasks(), list_notes(), summarize_notes(), prioritize_tasks(), set_due_date(title, dueDate), rename_task(title, newTitle), clear_completed().',
   ].join(' ');
 }
 
@@ -43,108 +43,10 @@ function getErrorDetail(err: unknown): unknown {
   return 'Unknown error';
 }
 
-// Very small local intent fallback for when Gemini is unavailable/blocked
-function parseTimeToIso(message: string): string | undefined {
-  const now = new Date();
-  const lower = message.toLowerCase();
-  const target = new Date(now);
-
-  const timeMatch = lower.match(/\bat\s+(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\b/);
-  let hour: number | undefined;
-  let minute: number | undefined;
-  if (timeMatch) {
-    hour = parseInt(timeMatch[1], 10);
-    minute = timeMatch[2] ? parseInt(timeMatch[2], 10) : 0;
-    const meridiem = timeMatch[3];
-    if (meridiem) {
-      if (meridiem === 'pm' && hour < 12) hour += 12;
-      if (meridiem === 'am' && hour === 12) hour = 0;
-    }
-  }
-
-  if (lower.includes('tomorrow')) {
-    target.setDate(now.getDate() + 1);
-  }
-
-  if (hour !== undefined) target.setHours(hour, minute ?? 0, 0, 0);
-  else target.setHours(17, 0, 0, 0);
-  return target.toISOString();
-}
-
-function stripPhrases(s: string): string {
-  return s
-    .replace(/\bto\s+my\s+(to-?do|todo|task)\s+list\b/gi, '')
-    .replace(/\bto\s+(my\s+)?list\b/gi, '')
-    .replace(/\btoday\b/gi, '')
-    .replace(/\btomorrow\b/gi, '')
-    .replace(/\bat\s+\d{1,2}(:\d{2})?\s*(am|pm)?/gi, '')
-    .replace(/\s{2,}/g, ' ')
-    .trim();
-}
-
-function localIntent(messages: ChatMessage[]): {
-  text: string;
-  toolCall: { name: string; args: Record<string, unknown> } | null;
-} {
-  const lastUser = [...messages].reverse().find((m) => m.role === 'user');
-  const utterance = lastUser?.content || '';
-  const lower = utterance.toLowerCase();
-
-  // Add task
-  if (/(^|\s)(add|create)\b/.test(lower) && /(task|to-?do|todo)/.test(lower)) {
-    const dueDate = parseTimeToIso(utterance);
-    let title = utterance.replace(/^(.*?)(add|create)\s+/i, '');
-    title = stripPhrases(title);
-    if (!title) title = 'New Task';
-    return {
-      text: 'Added task (local).',
-      toolCall: { name: 'add_task', args: { title, dueDate } },
-    };
-  }
-
-  // Complete task
-  if (/(^|\s)(complete|finish|done|mark as done)\b/.test(lower)) {
-    const title =
-      stripPhrases(
-        utterance.replace(/^(.*?)(complete|finish|done|mark as done)\s+/i, '')
-      ) || 'task';
-    return {
-      text: 'Completed task (local).',
-      toolCall: { name: 'complete_task', args: { title } },
-    };
-  }
-
-  // Delete task
-  if (/(^|\s)(delete|remove)\b/.test(lower)) {
-    const title =
-      stripPhrases(utterance.replace(/^(.*?)(delete|remove)\s+/i, '')) ||
-      'task';
-    return {
-      text: 'Deleted task (local).',
-      toolCall: { name: 'delete_task', args: { title } },
-    };
-  }
-
-  // Note
-  if (/(^|\s)(note|remember|write)\b/.test(lower)) {
-    const text =
-      stripPhrases(utterance.replace(/^(.*?)(note|remember|write)\s+/i, '')) ||
-      utterance;
-    return {
-      text: 'Added note (local).',
-      toolCall: { name: 'add_note', args: { text } },
-    };
-  }
-
-  return {
-    text: "I couldn't reach AI. No actionable intent detected.",
-    toolCall: null,
-  };
-}
-
 app.post('/api/agent', async (req, res) => {
-  const { messages } = req.body as { messages: ChatMessage[] };
   try {
+    const { messages } = req.body as { messages: ChatMessage[] };
+
     const systemPrompt = buildSystemPrompt();
 
     const combined = [
@@ -181,12 +83,7 @@ app.post('/api/agent', async (req, res) => {
                 'Mark a task complete by matching on title or partial title.',
               parameters: {
                 type: 'OBJECT',
-                properties: {
-                  title: {
-                    type: 'STRING',
-                    description: 'Title or partial title to match',
-                  },
-                },
+                properties: { title: { type: 'STRING' } },
                 required: ['title'],
               },
             },
@@ -196,12 +93,7 @@ app.post('/api/agent', async (req, res) => {
                 'Delete a task by matching on title or partial title.',
               parameters: {
                 type: 'OBJECT',
-                properties: {
-                  title: {
-                    type: 'STRING',
-                    description: 'Title or partial title to match',
-                  },
-                },
+                properties: { title: { type: 'STRING' } },
                 required: ['title'],
               },
             },
@@ -210,11 +102,60 @@ app.post('/api/agent', async (req, res) => {
               description: "Append a note to the user's notepad.",
               parameters: {
                 type: 'OBJECT',
-                properties: {
-                  text: { type: 'STRING', description: 'Note text' },
-                },
+                properties: { text: { type: 'STRING' } },
                 required: ['text'],
               },
+            },
+            {
+              name: 'list_tasks',
+              description: 'Request a list of current tasks. No parameters.',
+              parameters: { type: 'OBJECT', properties: {} },
+            },
+            {
+              name: 'list_notes',
+              description: 'Request current notes content. No parameters.',
+              parameters: { type: 'OBJECT', properties: {} },
+            },
+            {
+              name: 'summarize_notes',
+              description: "Summarize the user's notes briefly.",
+              parameters: { type: 'OBJECT', properties: {} },
+            },
+            {
+              name: 'prioritize_tasks',
+              description:
+                'Prioritize tasks based on due dates and completion status.',
+              parameters: { type: 'OBJECT', properties: {} },
+            },
+            {
+              name: 'set_due_date',
+              description: "Set or update a task's due date by title.",
+              parameters: {
+                type: 'OBJECT',
+                properties: {
+                  title: { type: 'STRING' },
+                  dueDate: { type: 'STRING' },
+                },
+                required: ['title', 'dueDate'],
+              },
+            },
+            {
+              name: 'rename_task',
+              description:
+                'Rename a task by matching title/partial and setting a newTitle.',
+              parameters: {
+                type: 'OBJECT',
+                properties: {
+                  title: { type: 'STRING' },
+                  newTitle: { type: 'STRING' },
+                },
+                required: ['title', 'newTitle'],
+              },
+            },
+            {
+              name: 'clear_completed',
+              description: 'Remove all completed tasks.',
+              parameters: { type: 'OBJECT', properties: {} },
             },
           ],
         },
@@ -257,8 +198,7 @@ app.post('/api/agent', async (req, res) => {
   } catch (err: unknown) {
     const detail = getErrorDetail(err);
     console.error('Gemini error', detail);
-    const fallback = localIntent(messages);
-    res.status(200).json(fallback);
+    res.status(500).json({ error: 'Agent error', detail });
   }
 });
 

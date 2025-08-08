@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { useAppStore } from '../store';
-import { Send } from 'lucide-react';
+import { Send, ListTodo, StickyNote } from 'lucide-react';
 
 export type ChatMessage = { role: 'user' | 'assistant'; content: string };
 
@@ -27,6 +27,7 @@ export default function Agent() {
     },
   ]);
   const [input, setInput] = useState('');
+  const [noteDraft, setNoteDraft] = useState('');
   const { addTask, toggleTask, deleteTask, setNotes } = useAppStore();
   const endRef = useRef<HTMLDivElement>(null);
 
@@ -91,10 +92,7 @@ export default function Agent() {
       const toolCall: { name: string; args: Record<string, unknown> } | null =
         data?.toolCall || null;
 
-      // Prefer tool call
       const executed = runTool(toolCall);
-
-      // Fallback to legacy JSON-in-text
       if (!executed) {
         const detected = extractAction(text);
         if (detected?.action) {
@@ -137,9 +135,74 @@ export default function Agent() {
     }
   }
 
+  function quickAddTask() {
+    if (!input.trim()) return;
+    addTask(input.trim());
+    setMessages((m) => [
+      ...m,
+      { role: 'assistant', content: `Added task: ${input.trim()}` },
+    ]);
+    setInput('');
+  }
+
+  function quickAddNote() {
+    if (!noteDraft.trim()) return;
+    setNotes((useAppStore.getState().notes || '') + '\n' + noteDraft.trim());
+    setMessages((m) => [...m, { role: 'assistant', content: 'Note added.' }]);
+    setNoteDraft('');
+  }
+
+  async function ask(prompt: string) {
+    setInput(prompt);
+    await sendMessage();
+  }
+
   return (
     <div className='card'>
-      <div className='mb-3 text-lg font-semibold'>Chat with HussainAI</div>
+      <div className='mb-3 flex items-center justify-between'>
+        <div className='text-lg font-semibold'>Chat with HussainAI</div>
+        <div className='flex gap-1'>
+          <button className='btn' onClick={() => ask('List my tasks')}>
+            Tasks
+          </button>
+          <button className='btn' onClick={() => ask('Summarize my notes')}>
+            Summarize Notes
+          </button>
+          <button className='btn' onClick={() => ask('Prioritize my tasks')}>
+            Prioritize
+          </button>
+        </div>
+      </div>
+
+      <div className='mb-3 grid grid-cols-1 gap-2 sm:grid-cols-2'>
+        <div className='flex items-center gap-2'>
+          <input
+            className='input'
+            placeholder='Quick task: e.g., Book flights'
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+          />
+          <button
+            className='btn'
+            onClick={quickAddTask}
+            aria-label='Add quick task'
+          >
+            <ListTodo size={16} />
+          </button>
+        </div>
+        <div className='flex items-center gap-2'>
+          <input
+            className='input'
+            placeholder='Quick note'
+            value={noteDraft}
+            onChange={(e) => setNoteDraft(e.target.value)}
+          />
+          <button className='btn' onClick={quickAddNote} aria-label='Add note'>
+            <StickyNote size={16} />
+          </button>
+        </div>
+      </div>
+
       <div className='max-h-[50vh] overflow-y-auto space-y-2 pr-2'>
         {messages.map((m, i) => (
           <div
@@ -157,10 +220,11 @@ export default function Agent() {
         ))}
         <div ref={endRef} />
       </div>
+
       <div className='mt-3 flex gap-2'>
         <input
           className='input'
-          placeholder='Ask me to add tasks, summarize notes, or plan your day...'
+          placeholder='Ask HussainAI to add tasks, set due dates, or summarize notes...'
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => {
@@ -175,7 +239,8 @@ export default function Agent() {
         </button>
       </div>
       <div className='mt-2 text-xs text-white/50'>
-        Tip: Try “Add grocery shopping tomorrow at 5pm”.
+        Tip: “Set due date for Book flights to tomorrow at 4pm” or “Rename task
+        Buy milk to Buy groceries”.
       </div>
     </div>
   );
