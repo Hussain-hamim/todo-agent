@@ -13,11 +13,11 @@ function NavBar() {
   const inactive = 'hover:bg-white/10';
 
   return (
-    <nav className='sticky top-0 z-50 border-b border-white/10 bg-[#1E2A38]/95 backdrop-blur supports-[backdrop-filter]:bg-[#1E2A38]/60'>
+    <nav className='hidden sm:block sticky top-0 z-50 border-b border-white/10 bg-[#1E2A38]/95 backdrop-blur supports-[backdrop-filter]:bg-[#1E2A38]/60'>
       <div className='mx-auto max-w-7xl px-4'>
         <div className='flex h-14 items-center gap-2'>
           <div className='font-semibold tracking-wide'>KarryTask</div>
-          <div className='ml-4 flex items-center gap-1'>
+          <div className='ml-4 flex items-center gap-1 overflow-x-auto'>
             <NavLink
               to='/work'
               className={`${linkBase} ${
@@ -65,9 +65,69 @@ function NavBar() {
   );
 }
 
+function MobileNavBar() {
+  const location = useLocation();
+  const isActive = (path: string) =>
+    location.pathname.startsWith(path) ? 'text-white' : 'text-white/70';
+  const itemBase =
+    'flex flex-col items-center justify-center gap-1 flex-1 py-2';
+
+  return (
+    <nav
+      className='sm:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-[#1E2A38]/95 backdrop-blur supports-[backdrop-filter]:bg-[#1E2A38]/60'
+      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+    >
+      <div className='mx-auto max-w-7xl'>
+        <div className='grid grid-cols-5 text-xs'>
+          <NavLink
+            to='/work'
+            className={`${itemBase} ${isActive('/work')}`}
+            aria-label='Work'
+          >
+            <ClipboardList size={18} />
+            <span>Work</span>
+          </NavLink>
+          <NavLink
+            to='/whiteboard'
+            className={`${itemBase} ${isActive('/whiteboard')}`}
+            aria-label='Whiteboard'
+          >
+            <Network size={18} />
+            <span>Board</span>
+          </NavLink>
+          <NavLink
+            to='/agent'
+            className={`${itemBase} ${isActive('/agent')}`}
+            aria-label='Agent'
+          >
+            <Brain size={18} />
+            <span>Agent</span>
+          </NavLink>
+          <NavLink
+            to='/reports'
+            className={`${itemBase} ${isActive('/reports')}`}
+            aria-label='Reports'
+          >
+            <BarChart3 size={18} />
+            <span>Reports</span>
+          </NavLink>
+          <NavLink
+            to='/account'
+            className={`${itemBase} ${isActive('/account')}`}
+            aria-label='Account'
+          >
+            <User size={18} />
+            <span>Account</span>
+          </NavLink>
+        </div>
+      </div>
+    </nav>
+  );
+}
+
 export default function App() {
   return (
-    <div className='min-h-screen'>
+    <div className='min-h-screen pb-24 sm:pb-0'>
       <NavBar />
       <main className='mx-auto max-w-7xl px-4 py-6'>
         <Routes>
@@ -79,6 +139,7 @@ export default function App() {
           <Route path='/account' element={<Account />} />
         </Routes>
       </main>
+      <MobileNavBar />
     </div>
   );
 }
