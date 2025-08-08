@@ -209,12 +209,15 @@ export default function Agent() {
       const toolCall: { name: string; args: Record<string, unknown> } | null =
         data?.toolCall || null;
 
-      const executed = runTool(toolCall);
+      let executed = runTool(toolCall);
       if (!executed) {
         const detected = extractAction(text);
         if (detected?.action) {
           if (detected.action === 'add_task' && detected.title)
-            addTask(detected.title, detected.dueDate);
+            addTask(
+              detected.title,
+              detected.dueDate || new Date().toISOString()
+            );
           else if (detected.action === 'complete_task' && detected.title) {
             const t = useAppStore
               .getState()
@@ -234,6 +237,16 @@ export default function Agent() {
               (useAppStore.getState().notes || '') + '\n' + detected.title
             );
           }
+          executed = true;
+        }
+      }
+
+      // Ultra-short fallback: treat short inputs as tasks
+      if (!executed) {
+        const words = question.split(/\s+/).filter(Boolean);
+        if (words.length > 0 && words.length <= 6) {
+          addTask(question, new Date().toISOString());
+          executed = true;
         }
       }
 
