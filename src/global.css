@@ -1,0 +1,32 @@
+@import 'tailwindcss';
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  /* Navy dark theme */
+  @apply bg-[#1E2A38] text-white antialiased;
+}
+
+a {
+  @apply text-white hover:opacity-80;
+}
+
+.btn {
+  @apply inline-flex items-center justify-center rounded-md bg-white/10 px-3 py-2 text-sm font-medium text-white hover:bg-white/20 transition;
+}
+
+.input {
+  @apply w-full rounded-md bg-black/20 border border-white/10 px-3 py-2 text-sm text-white placeholder-white/50 outline-none focus:border-white/30;
+}
+
+.card {
+  @apply rounded-lg bg-black/20 border border-white/10 p-4 shadow-sm;
+}
