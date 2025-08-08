@@ -35,12 +35,37 @@ function buildSystemPrompt(): string {
 
 function getErrorDetail(err: unknown): unknown {
   if (typeof err === 'object' && err !== null) {
-    const maybeResp = err as { response?: { data?: unknown } };
+    const maybeResp = err as { response?: { data?: unknown; status?: number } };
     if (maybeResp.response && 'data' in maybeResp.response)
       return maybeResp.response.data;
   }
   if (err instanceof Error) return err.message;
   return 'Unknown error';
+}
+
+async function callGemini(models: string[], payload: Record<string, unknown>) {
+  const errors: Array<{ model: string; detail: unknown }> = [];
+  for (let i = 0; i < models.length; i += 1) {
+    const model = models[i];
+    try {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${NEXT_PUBLIC_GEMINI_API_KEY}`;
+      const response = await axios.post(url, payload);
+      return { model, response: response.data as unknown };
+    } catch (err: unknown) {
+      const detail = getErrorDetail(err);
+      errors.push({ model, detail });
+      const status =
+        (detail as { error?: { status?: string; code?: number } })?.error
+          ?.status || (detail as { error?: { code?: number } })?.error?.code;
+      const httpStatus = (err as { response?: { status?: number } })?.response
+        ?.status as number | undefined;
+      const isQuota = status === 'RESOURCE_EXHAUSTED' || httpStatus === 429;
+      if (!isQuota) {
+        break;
+      }
+    }
+  }
+  throw new Error(`All Gemini models failed: ${JSON.stringify(errors)}`);
 }
 
 app.post('/api/agent', async (req, res) => {
@@ -54,9 +79,7 @@ app.post('/api/agent', async (req, res) => {
       ...messages.map((m) => ({ role: m.role, parts: [{ text: m.content }] })),
     ];
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${NEXT_PUBLIC_GEMINI_API_KEY}`;
-
-    const response = await axios.post(url, {
+    const primaryPayload = {
       contents: combined,
       tools: [
         {
@@ -166,9 +189,41 @@ app.post('/api/agent', async (req, res) => {
         topP: 0.95,
         maxOutputTokens: 512,
       },
-    });
+    } as const;
 
-    const candidate = response.data?.candidates?.[0];
+    const fallbackPayload = {
+      ...primaryPayload,
+      generationConfig: {
+        ...primaryPayload.generationConfig,
+        temperature: 0.2,
+        maxOutputTokens: 256,
+      },
+    } as const;
+
+    const modelsInOrder = ['gemini-1.5-flash-8b', 'gemini-1.5-flash'];
+
+    let data: unknown = null;
+    try {
+      const first = await callGemini(
+        modelsInOrder,
+        primaryPayload as unknown as Record<string, unknown>
+      );
+      data = first.response as unknown as {
+        candidates?: Array<{ content?: { parts?: unknown[] } }>;
+      };
+    } catch {
+      const second = await callGemini(
+        modelsInOrder,
+        fallbackPayload as unknown as Record<string, unknown>
+      );
+      data = second.response as unknown as {
+        candidates?: Array<{ content?: { parts?: unknown[] } }>;
+      };
+    }
+
+    const candidate = (
+      data as { candidates?: Array<{ content?: { parts?: unknown[] } }> }
+    )?.candidates?.[0];
     type Part = {
       text?: string;
       functionCall?: { name: string; args?: Record<string, unknown> };
@@ -198,7 +253,7 @@ app.post('/api/agent', async (req, res) => {
   } catch (err: unknown) {
     const detail = getErrorDetail(err);
     console.error('Gemini error', detail);
-    res.status(500).json({ error: 'Agent error', detail });
+    res.status(503).json({ error: 'Agent temporarily unavailable', detail });
   }
 });
 
