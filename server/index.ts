@@ -43,10 +43,108 @@ function getErrorDetail(err: unknown): unknown {
   return 'Unknown error';
 }
 
-app.post('/api/agent', async (req, res) => {
-  try {
-    const { messages } = req.body as { messages: ChatMessage[] };
+// Very small local intent fallback for when Gemini is unavailable/blocked
+function parseTimeToIso(message: string): string | undefined {
+  const now = new Date();
+  const lower = message.toLowerCase();
+  const target = new Date(now);
 
+  const timeMatch = lower.match(/\bat\s+(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\b/);
+  let hour: number | undefined;
+  let minute: number | undefined;
+  if (timeMatch) {
+    hour = parseInt(timeMatch[1], 10);
+    minute = timeMatch[2] ? parseInt(timeMatch[2], 10) : 0;
+    const meridiem = timeMatch[3];
+    if (meridiem) {
+      if (meridiem === 'pm' && hour < 12) hour += 12;
+      if (meridiem === 'am' && hour === 12) hour = 0;
+    }
+  }
+
+  if (lower.includes('tomorrow')) {
+    target.setDate(now.getDate() + 1);
+  }
+
+  if (hour !== undefined) target.setHours(hour, minute ?? 0, 0, 0);
+  else target.setHours(17, 0, 0, 0);
+  return target.toISOString();
+}
+
+function stripPhrases(s: string): string {
+  return s
+    .replace(/\bto\s+my\s+(to-?do|todo|task)\s+list\b/gi, '')
+    .replace(/\bto\s+(my\s+)?list\b/gi, '')
+    .replace(/\btoday\b/gi, '')
+    .replace(/\btomorrow\b/gi, '')
+    .replace(/\bat\s+\d{1,2}(:\d{2})?\s*(am|pm)?/gi, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
+
+function localIntent(messages: ChatMessage[]): {
+  text: string;
+  toolCall: { name: string; args: Record<string, unknown> } | null;
+} {
+  const lastUser = [...messages].reverse().find((m) => m.role === 'user');
+  const utterance = lastUser?.content || '';
+  const lower = utterance.toLowerCase();
+
+  // Add task
+  if (/(^|\s)(add|create)\b/.test(lower) && /(task|to-?do|todo)/.test(lower)) {
+    const dueDate = parseTimeToIso(utterance);
+    let title = utterance.replace(/^(.*?)(add|create)\s+/i, '');
+    title = stripPhrases(title);
+    if (!title) title = 'New Task';
+    return {
+      text: 'Added task (local).',
+      toolCall: { name: 'add_task', args: { title, dueDate } },
+    };
+  }
+
+  // Complete task
+  if (/(^|\s)(complete|finish|done|mark as done)\b/.test(lower)) {
+    const title =
+      stripPhrases(
+        utterance.replace(/^(.*?)(complete|finish|done|mark as done)\s+/i, '')
+      ) || 'task';
+    return {
+      text: 'Completed task (local).',
+      toolCall: { name: 'complete_task', args: { title } },
+    };
+  }
+
+  // Delete task
+  if (/(^|\s)(delete|remove)\b/.test(lower)) {
+    const title =
+      stripPhrases(utterance.replace(/^(.*?)(delete|remove)\s+/i, '')) ||
+      'task';
+    return {
+      text: 'Deleted task (local).',
+      toolCall: { name: 'delete_task', args: { title } },
+    };
+  }
+
+  // Note
+  if (/(^|\s)(note|remember|write)\b/.test(lower)) {
+    const text =
+      stripPhrases(utterance.replace(/^(.*?)(note|remember|write)\s+/i, '')) ||
+      utterance;
+    return {
+      text: 'Added note (local).',
+      toolCall: { name: 'add_note', args: { text } },
+    };
+  }
+
+  return {
+    text: "I couldn't reach AI. No actionable intent detected.",
+    toolCall: null,
+  };
+}
+
+app.post('/api/agent', async (req, res) => {
+  const { messages } = req.body as { messages: ChatMessage[] };
+  try {
     const systemPrompt = buildSystemPrompt();
 
     const combined = [
@@ -159,7 +257,8 @@ app.post('/api/agent', async (req, res) => {
   } catch (err: unknown) {
     const detail = getErrorDetail(err);
     console.error('Gemini error', detail);
-    res.status(500).json({ error: 'Agent error', detail });
+    const fallback = localIntent(messages);
+    res.status(200).json(fallback);
   }
 });
 
