@@ -1,5 +1,6 @@
 import { NavLink, Route, Routes, useLocation } from 'react-router-dom';
 import { ClipboardList, Brain, BarChart3, User, Network } from 'lucide-react';
+import Landing from './pages/Landing';
 import Work from './pages/Work';
 import Whiteboard from './pages/Whiteboard';
 import Agent from './pages/Agent';
@@ -16,7 +17,9 @@ function NavBar() {
     <nav className='hidden sm:block sticky top-0 z-50 border-b border-white/10 bg-[#1E2A38]/95 backdrop-blur supports-[backdrop-filter]:bg-[#1E2A38]/60'>
       <div className='mx-auto max-w-7xl px-4'>
         <div className='flex h-14 items-center gap-2'>
-          <div className='font-semibold tracking-wide'>KarryTask</div>
+          <NavLink to='/'>
+            <div className='font-semibold tracking-wide'>HussainTaskAI</div>
+          </NavLink>
           <div className='ml-4 flex items-center gap-1 overflow-x-auto'>
             <NavLink
               to='/work'
@@ -40,7 +43,7 @@ function NavBar() {
                 location.pathname.startsWith('/agent') ? active : inactive
               }`}
             >
-              <Brain size={16} /> Mr. Karry
+              <Brain size={16} /> HussainAI
             </NavLink>
             <NavLink
               to='/reports'
@@ -98,10 +101,10 @@ function MobileNavBar() {
           <NavLink
             to='/agent'
             className={`${itemBase} ${isActive('/agent')}`}
-            aria-label='Agent'
+            aria-label='HussainAI'
           >
             <Brain size={18} />
-            <span>Agent</span>
+            <span>HussainAI</span>
           </NavLink>
           <NavLink
             to='/reports'
@@ -131,7 +134,7 @@ export default function App() {
       <NavBar />
       <main className='mx-auto max-w-7xl px-4 py-6'>
         <Routes>
-          <Route path='/' element={<Work />} />
+          <Route path='/' element={<Landing />} />
           <Route path='/work' element={<Work />} />
           <Route path='/whiteboard' element={<Whiteboard />} />
           <Route path='/agent' element={<Agent />} />

@@ -11,8 +11,7 @@ body,
 }
 
 body {
-  /* Navy dark theme */
-  @apply bg-[#1E2A38] text-white antialiased;
+  @apply bg-[#0f1720] text-white antialiased;
 }
 
 a {
@@ -28,5 +27,21 @@ a {
 }
 
 .card {
-  @apply rounded-lg bg-black/20 border border-white/10 p-4 shadow-sm;
+  @apply rounded-lg bg-white/5 border border-white/10 p-4 shadow-sm hover:border-white/20 transition;
+}
+
+@theme {
+  @keyframes blob-slow {
+    0%,
+    100% {
+      transform: translate(0, 0) scale(1);
+    }
+    50% {
+      transform: translate(10px, -8px) scale(1.05);
+    }
+  }
+}
+
+.animate-blob-slow {
+  animation: blob-slow 12s ease-in-out infinite;
 }

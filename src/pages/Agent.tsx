@@ -23,7 +23,7 @@ export default function Agent() {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: 'assistant',
-      content: "Hi, I'm Mr. Karry. How can I help you today?",
+      content: "Hello, I'm HussainAI. How can I help you today?",
     },
   ]);
   const [input, setInput] = useState('');
@@ -131,7 +131,7 @@ export default function Agent() {
         ...m,
         {
           role: 'assistant',
-          content: 'Sorry, I could not reach the AI right now.',
+          content: 'Sorry, I could not reach HussainAI right now.',
         },
       ]);
     }
@@ -139,7 +139,7 @@ export default function Agent() {
 
   return (
     <div className='card'>
-      <div className='mb-3 text-lg font-semibold'>Chat with Mr. Karry</div>
+      <div className='mb-3 text-lg font-semibold'>Chat with HussainAI</div>
       <div className='max-h-[50vh] overflow-y-auto space-y-2 pr-2'>
         {messages.map((m, i) => (
           <div
@@ -175,7 +175,7 @@ export default function Agent() {
         </button>
       </div>
       <div className='mt-2 text-xs text-white/50'>
-        Tip: Try “Add grocery shopping to my to-do list tomorrow at 5pm”.
+        Tip: Try “Add grocery shopping tomorrow at 5pm”.
       </div>
     </div>
   );
