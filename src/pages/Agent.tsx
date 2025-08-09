@@ -204,7 +204,10 @@ export default function Agent() {
     setMessages(next);
 
     try {
-      const { data } = await axios.post('/api/agent', { messages: next });
+      const { data } = await axios.post(
+        'https://todo-agent-ltin.onrender.com',
+        { messages: next }
+      );
       const text: string = data?.text ?? '';
       const toolCall: { name: string; args: Record<string, unknown> } | null =
         data?.toolCall || null;
@@ -300,7 +303,11 @@ export default function Agent() {
             }
           }}
         />
-        <button className='btn' onClick={sendMessage} aria-label='Send message'>
+        <button
+          className='btn primary'
+          onClick={sendMessage}
+          aria-label='Send message'
+        >
           <Send size={16} />
         </button>
       </div>
