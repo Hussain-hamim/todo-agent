@@ -205,7 +205,7 @@ export default function Agent() {
 
     try {
       const { data } = await axios.post(
-        'https://todo-agent-ltin.onrender.com',
+        'https://todo-agent-ltin.onrender.com/api/agent',
         { messages: next }
       );
       const text: string = data?.text ?? '';
