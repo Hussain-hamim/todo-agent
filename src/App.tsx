@@ -1,5 +1,5 @@
 import { NavLink, Route, Routes, useLocation } from 'react-router-dom';
-import { ClipboardList, Brain, BarChart3, User, Network } from 'lucide-react';
+import { ClipboardList, Brain, Network } from 'lucide-react';
 import Backdrop from './components/Backdrop';
 import Landing from './pages/Landing';
 import Work from './pages/Work';
