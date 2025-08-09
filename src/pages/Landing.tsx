@@ -13,7 +13,7 @@ export default function Landing() {
           transition={{ duration: 0.6 }}
           className='mx-auto max-w-3xl text-4xl font-extrabold tracking-tight sm:text-6xl'
         >
-          HussainTaskAI
+          UnknownAi
         </motion.h1>
         <motion.p
           initial={{ opacity: 0, y: 20 }}
@@ -21,7 +21,7 @@ export default function Landing() {
           transition={{ duration: 0.7, delay: 0.1 }}
           className='mx-auto mt-4 max-w-2xl text-white/80 sm:text-lg'
         >
-          Automate your day with HussainAI — add tasks, organize ideas, and get
+          Automate your day with UnknownAi — add tasks, organize ideas, and get
           instant help from your personal AI assistant.
         </motion.p>
         <motion.div
@@ -31,7 +31,7 @@ export default function Landing() {
           className='mt-8 flex items-center justify-center gap-3'
         >
           <Link to='/agent' className='btn inline-flex gap-2'>
-            <Brain size={18} /> Try HussainAI
+            <Brain size={18} /> Try UnknownAi
           </Link>
           <Link
             to='/work'
@@ -56,7 +56,7 @@ export default function Landing() {
           },
           {
             title: 'Actionable Agent',
-            desc: 'HussainAI understands and executes your commands.',
+            desc: 'UnknownAi understands and executes your commands.',
             icon: <Brain size={18} />,
           },
         ].map((f, idx) => (

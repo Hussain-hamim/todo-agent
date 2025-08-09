@@ -23,7 +23,7 @@ export default function Agent() {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: 'assistant',
-      content: "Hello, I'm HussainAI. How can I help you today?",
+      content: "Hello, I'm UnknownAi. How can I help you today?",
     },
   ]);
   const [input, setInput] = useState('');
@@ -262,7 +262,7 @@ export default function Agent() {
         ...m,
         {
           role: 'assistant',
-          content: 'Sorry, I could not reach HussainAI right now.',
+          content: 'Sorry, I could not reach UnknownAi right now.',
         },
       ]);
     }
@@ -270,7 +270,7 @@ export default function Agent() {
 
   return (
     <div className='card'>
-      <div className='mb-3 text-lg font-semibold'>Chat with HussainAI</div>
+      <div className='mb-3 text-lg font-semibold'>Chat with UnknownAi</div>
 
       <div className='max-h-[50vh] overflow-y-auto space-y-2 pr-2'>
         {messages.map((m, i) => (

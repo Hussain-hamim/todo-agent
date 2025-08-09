@@ -21,7 +21,7 @@ function NavBar() {
         <div className='flex h-16 items-center gap-2'>
           <NavLink to='/'>
             <div className='font-extrabold tracking-tight text-white'>
-              HussainTaskAI
+              UnknownAi
             </div>
           </NavLink>
           <div className='ml-4 flex items-center gap-1 overflow-x-auto'>
@@ -47,7 +47,7 @@ function NavBar() {
                 location.pathname.startsWith('/agent') ? active : inactive
               }`}
             >
-              <Brain size={16} /> HussainAI
+              <Brain size={16} /> UnknownAi
             </NavLink>
             <NavLink
               to='/reports'
@@ -105,10 +105,10 @@ function MobileNavBar() {
           <NavLink
             to='/agent'
             className={`${itemBase} ${isActive('/agent')}`}
-            aria-label='HussainAI'
+            aria-label='UnknownAi'
           >
             <Brain size={18} />
-            <span>HussainAI</span>
+            <span>UnknownAi</span>
           </NavLink>
           <NavLink
             to='/reports'
