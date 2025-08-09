@@ -37,6 +37,7 @@ export default function Agent() {
     clearCompleted,
   } = useAppStore();
   const endRef = useRef<HTMLDivElement>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -202,6 +203,7 @@ export default function Agent() {
       { role: 'user', content: question } as ChatMessage,
     ];
     setMessages(next);
+    setLoading(true); // start loading
 
     try {
       const { data } = await axios.post(
@@ -265,6 +267,8 @@ export default function Agent() {
           content: 'Sorry, I could not reach UnknownAi right now.',
         },
       ]);
+    } finally {
+      setLoading(false); // stop loading
     }
   }
 
@@ -287,6 +291,18 @@ export default function Agent() {
             </div>
           </div>
         ))}
+        {loading && (
+          <div className='text-left'>
+            <div className='inline-block max-w-[80%] rounded-lg px-3 py-2 text-sm bg-black/20'>
+              <span className='flex items-center gap-1'>
+                <span className='w-2 h-2 bg-white/70 rounded-full animate-bounce'></span>
+                <span className='w-2 h-2 bg-white/70 rounded-full animate-bounce [animation-delay:0.2s]'></span>
+                <span className='w-2 h-2 bg-white/70 rounded-full animate-bounce [animation-delay:0.4s]'></span>
+              </span>
+            </div>
+          </div>
+        )}
+
         <div ref={endRef} />
       </div>
 

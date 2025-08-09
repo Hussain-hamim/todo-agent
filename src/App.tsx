@@ -18,13 +18,16 @@ function NavBar() {
   return (
     <nav className='hidden sm:block sticky top-0 z-50 border-b border-white/10 bg-[#0b1220]/70 backdrop-blur-xl'>
       <div className='mx-auto max-w-7xl px-4'>
-        <div className='flex h-16 items-center gap-2'>
+        <div className='flex h-16 items-center justify-between'>
+          {/* Left - Logo */}
           <NavLink to='/'>
             <div className='font-extrabold tracking-tight text-white'>
               UnknownAi
             </div>
           </NavLink>
-          <div className='ml-4 flex items-center gap-1 overflow-x-auto'>
+
+          {/* Center - Nav Links */}
+          <div className='flex items-center gap-2'>
             <NavLink
               to='/work'
               className={`${linkBase} ${
@@ -33,14 +36,7 @@ function NavBar() {
             >
               <ClipboardList size={16} /> Work
             </NavLink>
-            <NavLink
-              to='/whiteboard'
-              className={`${linkBase} ${
-                location.pathname.startsWith('/whiteboard') ? active : inactive
-              }`}
-            >
-              <Network size={16} /> Whiteboard
-            </NavLink>
+
             <NavLink
               to='/agent'
               className={`${linkBase} ${
@@ -49,23 +45,10 @@ function NavBar() {
             >
               <Brain size={16} /> UnknownAi
             </NavLink>
-            <NavLink
-              to='/reports'
-              className={`${linkBase} ${
-                location.pathname.startsWith('/reports') ? active : inactive
-              }`}
-            >
-              <BarChart3 size={16} /> Reports
-            </NavLink>
-            <NavLink
-              to='/account'
-              className={`${linkBase} ${
-                location.pathname.startsWith('/account') ? active : inactive
-              }`}
-            >
-              <User size={16} /> Account
-            </NavLink>
           </div>
+
+          {/* Right - Empty space (or future buttons) */}
+          <div className='w-[80px]' />
         </div>
       </div>
     </nav>
@@ -81,26 +64,26 @@ function MobileNavBar() {
 
   return (
     <nav
-      className='sm:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-[#0b1220]/70 backdrop-blur-xl'
+      className='sm:hidden flex justify-center fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-[#0b1220]/70 backdrop-blur-xl'
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
       <div className='mx-auto max-w-7xl'>
-        <div className='grid grid-cols-5 text-xs'>
+        <div className='grid grid-cols-3 text-xs'>
+          <NavLink
+            to='/'
+            className={`${itemBase} ${isActive('/')}`}
+            aria-label='home'
+          >
+            <ClipboardList size={18} />
+            <span>Home</span>
+          </NavLink>
           <NavLink
             to='/work'
             className={`${itemBase} ${isActive('/work')}`}
-            aria-label='Work'
-          >
-            <ClipboardList size={18} />
-            <span>Work</span>
-          </NavLink>
-          <NavLink
-            to='/whiteboard'
-            className={`${itemBase} ${isActive('/whiteboard')}`}
-            aria-label='Whiteboard'
+            aria-label='work'
           >
             <Network size={18} />
-            <span>Board</span>
+            <span>Work</span>
           </NavLink>
           <NavLink
             to='/agent'
@@ -109,22 +92,6 @@ function MobileNavBar() {
           >
             <Brain size={18} />
             <span>UnknownAi</span>
-          </NavLink>
-          <NavLink
-            to='/reports'
-            className={`${itemBase} ${isActive('/reports')}`}
-            aria-label='Reports'
-          >
-            <BarChart3 size={18} />
-            <span>Reports</span>
-          </NavLink>
-          <NavLink
-            to='/account'
-            className={`${itemBase} ${isActive('/account')}`}
-            aria-label='Account'
-          >
-            <User size={18} />
-            <span>Account</span>
           </NavLink>
         </div>
       </div>

@@ -31,19 +31,19 @@ export default function Landing() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.2 }}
-          className='mt-10 flex items-center justify-center gap-5'
+          className='mt-10 flex flex-col sm:flex-row items-center justify-center gap-5'
         >
           <Link
             to='/agent'
             className='btn-glass inline-flex items-center gap-2 rounded-lg px-6 py-3 font-semibold
-            bg-white/10 hover:bg-white/20 text-white shadow-lg transition duration-300'
+      bg-white/10 hover:bg-white/20 text-white shadow-lg transition duration-300'
           >
             <Brain size={20} /> Try UnknownAi
           </Link>
           <Link
             to='/work'
             className='btn-glass inline-flex items-center gap-2 rounded-lg px-6 py-3 font-semibold
-             text-[#1E2A38]  shadow-lg transition duration-300'
+      text-[#1E2A38] shadow-lg transition duration-300'
           >
             <ClipboardList size={20} /> Go to Work
           </Link>
@@ -58,7 +58,7 @@ export default function Landing() {
             icon: <Rocket size={20} />,
           },
           {
-            title: 'Visual Whiteboard',
+            title: 'Summarize Your Day',
             desc: 'Sketch ideas, map flows, and brainstorm on the go.',
             icon: <Sparkles size={20} />,
           },
